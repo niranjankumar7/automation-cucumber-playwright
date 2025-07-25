@@ -15,7 +15,7 @@ let browser: Browser, page: Page;
 let dataPlaneUrl = '', writeKey = '', deliveredBefore = 0;
 Given('I log in to RudderStack', async () => {
   logStep('Log in & skip MFA');
-  browser = await chromium.launch({ headless: false });
+  browser = await chromium.launch({ headless: true });
   page = await browser.newPage();
   const login = new LoginPage(page);
   await login.navigateToLogin();
