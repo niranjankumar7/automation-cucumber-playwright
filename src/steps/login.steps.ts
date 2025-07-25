@@ -17,7 +17,7 @@ const getEnv = (val: string) =>
 
 Given('the user is on the login page', async () => {
     logStep('Launch browser & navigate to login');
-    browser = await chromium.launch({ headless: false, slowMo: 100 });
+    browser = await chromium.launch({ headless: true }); 
     page = await browser.newPage();
     loginPage = new LoginPage(page);
     await loginPage.navigateToLogin();
