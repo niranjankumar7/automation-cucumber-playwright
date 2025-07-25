@@ -1,20 +1,20 @@
 <?xml version="1.0"?>
-<testsuite name="Cucumber" time="118.922" tests="4" skipped="0" failures="0" errors="0" timestamp="2025-07-25T17:29:38.847Z">
-  <testcase classname="RudderStack Login" name="Successful login with valid credentials" time="26.304">
+<testsuite name="Cucumber" time="117.149" tests="4" skipped="0" failures="0" errors="0" timestamp="2025-07-25T18:55:42.057Z">
+  <testcase classname="RudderStack Login" name="Successful login with valid credentials" time="21.021">
     <system-out><![CDATA[Given the user is on the login page.........................................passed
 When the user enters email "env:RUDDERSTACK_EMAIL"..........................passed
 And the user enters password "env:RUDDERSTACK_PASSWORD".....................passed
 And the user submits the login form.........................................passed
 Then the user should land on the Connections page...........................passed]]></system-out>
   </testcase>
-  <testcase classname="RudderStack Login" name="Login fails with invalid password" time="10.912">
+  <testcase classname="RudderStack Login" name="Login fails with invalid password" time="7.753">
     <system-out><![CDATA[Given the user is on the login page.........................................passed
 When the user enters email "env:RUDDERSTACK_EMAIL"..........................passed
 And the user enters password "wrongpassword"................................passed
 And the user submits the login form.........................................passed
 Then the error message "Wrong email or password." should be displayed.......passed]]></system-out>
   </testcase>
-  <testcase classname="Rudderstack E2E Automation" name="Send Event and Measure Webhook Delivery Time" time="57.753">
+  <testcase classname="Rudderstack E2E Automation" name="Send Event and Measure Webhook Delivery Time" time="62.641">
     <system-out><![CDATA[Given I log in to RudderStack...............................................passed
 And I read and store the data plane URL.....................................passed
 And I read and store the write key from the HTTP source.....................passed
@@ -22,7 +22,7 @@ And I send an event using the HTTP API......................................pass
 Then I go to the Webhook destination's Events tab...........................passed
 Then I wait for and measure the delivery time for the event.................passed]]></system-out>
   </testcase>
-  <testcase classname="Rudderstack E2E Automation" name="API returns error for invalid write key" time="23.931">
+  <testcase classname="Rudderstack E2E Automation" name="API returns error for invalid write key" time="25.23">
     <system-out><![CDATA[Given I log in to RudderStack...............................................passed
 And I read and store the data plane URL.....................................passed
 And I use an invalid write key..............................................passed
