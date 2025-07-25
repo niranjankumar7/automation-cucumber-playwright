@@ -1,16 +1,14 @@
 {
   "name": "rudderstack",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "cucumber-js --require-module ts-node/register --require src/support/hooks.ts --require src/steps/**/*.ts --format progress --format html:reports/cucumber-report.html --format junit:reports/cucumber-report.xml src/feature/**/*.feature",
+    "test:parallel": "cucumber-js --parallel 4 --require-module ts-node/register --require src/support/hooks.ts --require src/steps/**/*.ts --format progress --format html:reports/cucumber-report.html --format junit:reports/cucumber-report.xml src/feature/**/*.feature",
+    "open-report": "open reports/cucumber-report.html"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "@cucumber/cucumber": "^12.1.0",
+    "@cucumber/messages": "^28.1.0",
     "@playwright/test": "^1.54.1",
     "@types/node": "^24.1.0",
     "dotenv": "^17.2.0",

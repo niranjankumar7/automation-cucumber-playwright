@@ -1,74 +1,90 @@
+// src/pages/loginPage.ts
 import { Page } from 'playwright';
+import { BasePage } from './basePage';
+import { logStep, logInfo } from '../utils/logger';
 
-export class LoginPage {
+export class LoginPage extends BasePage {
   private loginButton = "//button[@type='button']/span[text()='Log in']";
-  private errorMessageSelector = '.sc-fnOeCC.qPpXN';
+  private emailInput = '[data-testid="Email"]';
+  private passwordInput = '[data-testid="Password"]';
+  private errorMsg = '.sc-fnOeCC.qPpXN';
+  private mfaLater = 'a[href="/addmfalater"]';
+  private goToDashboard = 'button:has-text("Go to dashboard")';
+  private connHeader = 'h3.sc-iBAcGC.fJpLL';
 
-  constructor(private page: Page) {}
+  constructor(page: Page) { super(page); }
 
-  async goto() {
-    const RUDDERSTACK_URL = process.env.RUDDERSTACK_URL;
-    if (!RUDDERSTACK_URL) throw new Error('RUDDERSTACK_URL is not defined in the environment variables');
-    await this.page.goto(RUDDERSTACK_URL);
+  /* Actions */
+  async navigateToLogin(): Promise<void> {
+    await this.closeAIPopup();
+    logStep('Navigating to login page');
+    const url = process.env.RUDDERSTACK_URL!;
+    if (!url) throw new Error('RUDDERSTACK_URL missing');
+    await this.page.goto(url);
   }
 
-  async enterEmail(email: string) {
-    await this.page.fill('[data-testid="Email"]', email);
+  async fillEmail(email: string): Promise<void> {
+    await this.closeAIPopup();
+    logStep(`Entering email: ${email}`);
+    await this.page.fill(this.emailInput, email);
   }
 
-  async enterPassword(password: string) {
-    await this.page.fill('[data-testid="Password"]', password);
+  async fillPassword(password: string): Promise<void> {
+    await this.closeAIPopup();
+    logStep('Entering password');
+    await this.page.fill(this.passwordInput, password);
   }
 
-  async submit() {
+  async clickLogin(): Promise<void> {
+    await this.closeAIPopup();
+    logStep('Clicking Log in');
+    const btn = this.page.locator(this.loginButton);
+    if (!(await btn.isEnabled())) {
+      throw new Error('Login button is disabled');
+    }
+    await btn.click();
+  }
+
+  async handleMfaIfPresent(): Promise<void> {
+    await this.closeAIPopup();
+    try {
+      await this.page.waitForSelector(this.connHeader, { timeout: 5000 });
+      return;
+    } catch {}
+    const link = await this.page.$(this.mfaLater);
+    if (!link) throw new Error('MFA prompt not found and not on Connections');
+    logStep("Skipping MFA ('I'll do this later')");
+    await link.click();
+    await this.closeAIPopup();
+    await this.page.click(this.goToDashboard);
+    await this.closeAIPopup();
+    await this.page.waitForSelector(this.connHeader, { timeout: 10000 });
+  }
+
+  /* Assertions */
+  async assertError(expected: string): Promise<void> {
+    await this.closeAIPopup();
+    logStep(`Verifying error message contains "${expected}"`);
+    await this.page.waitForSelector(this.errorMsg, { timeout: 5000 });
+    const actual = (await this.page.textContent(this.errorMsg))?.trim() || '';
+    if (!actual.includes(expected)) {
+      throw new Error(`Expected "${expected}", got "${actual}"`);
+    }
+    logInfo('Error message verified');
+  }
+
+  async assertOnConnections(): Promise<void> {
+    await this.handleMfaIfPresent();
+    await this.closeAIPopup();
+    logStep('Verifying Connections page');
+    await this.page.waitForSelector(this.connHeader, { timeout: 10000 });
+    const text = (await this.page.textContent(this.connHeader))?.trim().toLowerCase();
+    if (!text?.includes('connections')) throw new Error('Not on Connections page');
+    logInfo('On Connections page');
+  }
+  async isLoginButtonDisabled(): Promise<boolean> {
     const button = this.page.locator(this.loginButton);
-    if (await button.isEnabled()) {
-      await button.click();
-    } else {
-      throw new Error('Login button is disabled—form is not valid');
-    }
-  }
-
-  async getErrorMessage(): Promise<string | null> {
-    try {
-      await this.page.waitForSelector(this.errorMessageSelector, { timeout: 5000 });
-      return this.page.textContent(this.errorMessageSelector);
-    } catch {
-      return null;
-    }
-  }
-
-  async handleMfaIfPresent(page: Page): Promise<void> {
-    // Try to detect Connections page header
-    try {
-      await page.waitForSelector('h3.sc-iBAcGC.fJpLL', { timeout: 5000 });
-      const headerText = await page.textContent('h3.sc-iBAcGC.fJpLL');
-      if (headerText?.trim().toLowerCase().includes('connections')) {
-        return; // Already on connections page!
-      }
-    } catch { /* continue to MFA check if header not found */ }
-  
-    // Check for "I'll do this later" link
-    const doLaterLink = await page.$('a[href="/addmfalater"]');
-    if (doLaterLink) {
-      console.log("MFA setup prompt detected. Clicking 'I'll do this later'...");
-      await doLaterLink.click();
-  
-      // After skipping MFA, wait for "Go to dashboard" button
-      const goToDashboardBtn = await page.waitForSelector('button:has-text("Go to dashboard")', { timeout: 10000 });
-      if (goToDashboardBtn) {
-        await goToDashboardBtn.click();
-      }
-  
-      // Wait for Connections page header again
-      await page.waitForSelector('h3.sc-iBAcGC.fJpLL', { timeout: 10000 });
-      const headerText = await page.textContent('h3.sc-iBAcGC.fJpLL');
-      if (!headerText?.trim().toLowerCase().includes('connections')) {
-        throw new Error('Connections header not found after skipping MFA.');
-      }
-    } else {
-      throw new Error('Neither Connections page nor MFA setup flow appeared after login.');
-    }
+    return !(await button.isEnabled());
   }
   
 }

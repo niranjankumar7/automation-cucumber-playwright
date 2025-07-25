@@ -1,7 +1,7 @@
 import { Page } from 'playwright';
 
 export class HttpSourcePage {
-  constructor(private page: Page) {}
+  constructor(protected page: Page) {}
 
   async open() {
     // Implement navigation to HTTP Source page if needed
