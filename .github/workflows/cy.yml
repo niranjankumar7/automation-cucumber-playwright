@@ -17,6 +17,7 @@ jobs:
       RUDDERSTACK_EMAIL: ${{ secrets.RUDDERSTACK_EMAIL }}
       RUDDERSTACK_PASSWORD: ${{ secrets.RUDDERSTACK_PASSWORD }}
       RUDDERSTACK_URL: ${{ secrets.RUDDERSTACK_URL }}
+      REQUESTCATCHER_URL: ${{ secrets.REQUESTCATCHER_URL }}
 
     steps:
       - name: Checkout code
@@ -33,17 +34,34 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
+      - name: Validate Webhook Endpoint
+        run: |
+          if [ -z "${REQUESTCATCHER_URL}" ]; then
+            echo "Error: REQUESTCATCHER_URL is not set in secrets."
+            exit 1
+          fi
+          response=$(curl -s -o /dev/null -w "%{http_code}" "${REQUESTCATCHER_URL}/test")
+          if [ "$response" -ne 200 ]; then
+            echo "Error: Webhook endpoint ${REQUESTCATCHER_URL} is not active (HTTP $response)."
+            exit 1
+          else
+            echo "Webhook endpoint ${REQUESTCATCHER_URL} is active."
+          fi
+
       - name: Run E2E Tests (Headless)
         run: npm test
+        timeout-minutes: 30 # Added to prevent long hangs
 
       - name: Upload Cucumber HTML report
         uses: actions/upload-artifact@v4
+        if: always() # Ensure upload even if tests fail
         with:
           name: cucumber-html-report
           path: reports/cucumber-report.html
 
       - name: Upload Cucumber JUnit report
         uses: actions/upload-artifact@v4
+        if: always() # Ensure upload even if tests fail
         with:
           name: cucumber-junit-report
           path: reports/cucumber-report.xml
