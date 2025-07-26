@@ -1,4 +1,3 @@
-// src/steps/rudderstack.steps.ts
 import { Given, When, Then, setDefaultTimeout } from '@cucumber/cucumber';
 // Browser and page management are handled in hooks.ts; no direct launch here.
 import { LoginPage } from '../pages/loginPage';
@@ -11,8 +10,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 setDefaultTimeout(180_000);
 
-// Scenario‑scoped variables are now stored on the Cucumber World (this).
-// e.g. this.dataPlaneUrl, this.writeKey, this.deliveredBefore, this.expectFailure
+// Logs into the RudderStack app using credentials from .env.
 Given('I log in to RudderStack', async function () {
   logStep('Log in & skip MFA');
   const login = new LoginPage(this.page!);
@@ -72,14 +70,13 @@ Then('I wait for and measure the delivery time for the event', async function ()
     throw new Error(`Not delivered within ${secs}s (before=${this.deliveredBefore}, after=${delivered})`);
   }
   console.log(`Delivered in ${secs}s`);
-  // Browser cleanup is handled by the After hook.
 });
 
 Given('I use an invalid write key', function () {
   this.expectFailure = true;
   this.writeKey      = 'INVALID_WRITE_KEY';
 });
-// 2) “Then I fetch and report the delivered and failed event count”
+
 Then('I fetch and report the delivered and failed event count', async function () {
   const webhookPage = new WebhookDestinationPage(this.page!);
   await webhookPage.refreshEvents();
@@ -94,5 +91,4 @@ Then('I fetch and report the delivered and failed event count', async function (
   } else {
     console.log(`✅ All events delivered successfully.`);
   }
-  // Browser/page cleanup is handled by the After hook.
 });

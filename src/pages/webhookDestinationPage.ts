@@ -1,4 +1,3 @@
-// src/pages/webhookDestinationPage.ts
 import { Page } from 'playwright';
 import { BasePage } from './basePage';
 import { logStep, logInfo } from '../utils/logger';
@@ -14,6 +13,8 @@ export class WebhookDestinationPage extends BasePage {
 
   constructor(page: Page) { super(page); }
 
+// Navigates to the "Events" tab of the selected Webhook destination.
+// Required before reading delivered/failed events.
   async openEventsTab(): Promise<void> {
     await this.closeAIPopup();
     logStep('Opening Webhook Events tab');
@@ -24,6 +25,8 @@ export class WebhookDestinationPage extends BasePage {
     logInfo('Events tab opened');
   }
 
+// Refreshes the Events tab to update delivery counts.
+// Helps with polling logic while waiting for an event to arrive.
   async refreshEvents(): Promise<void> {
     await this.closeAIPopup();
     logStep('Refreshing events');
@@ -31,6 +34,9 @@ export class WebhookDestinationPage extends BasePage {
     await this.page.waitForTimeout(1500);
   }
 
+// Reads the delivery statistics (delivered & failed) from the Webhook Events tab.
+// Ensures selectors are loaded, extracts and parses both counts as integers.
+// This is typically used to compare event delivery metrics before and after sending a track event.
   async getDeliveredAndFailedCounts(): Promise<{ delivered: number; failed: number }> {
     await this.closeAIPopup();
     logStep('Reading delivered/failed counts');
@@ -48,6 +54,10 @@ export class WebhookDestinationPage extends BasePage {
     return { delivered, failed };
   }
 
+// Fetches all event names listed in the Events table.
+// Useful for verifying that specific named events were delivered to the Webhook destination.
+// Returns a list of string names extracted from the UI.
+// Not fully implemented - can be implemented for futurue validation
   async getAllEventNames(): Promise<string[]> {
     await this.closeAIPopup();
     logStep('Fetching all event names');

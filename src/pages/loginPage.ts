@@ -1,4 +1,3 @@
-// src/pages/loginPage.ts
 import { Page } from 'playwright';
 import { BasePage } from './basePage';
 import { logStep, logInfo } from '../utils/logger';
@@ -15,6 +14,7 @@ export class LoginPage extends BasePage {
   constructor(page: Page) { super(page); }
 
   /* Actions */
+  // Navigates to the RudderStack login page using the provided URL.
   async navigateToLogin(): Promise<void> {
     await this.closeAIPopup();
     logStep('Navigating to login page');
@@ -22,19 +22,21 @@ export class LoginPage extends BasePage {
     if (!url) throw new Error('RUDDERSTACK_URL missing');
     await this.page.goto(url);
   }
-
+// Fills in the email field during login from environment.
   async fillEmail(email: string): Promise<void> {
     await this.closeAIPopup();
     logStep(`Entering email: ${email}`);
     await this.page.fill(this.emailInput, email);
   }
 
+  // Fills in the password field with secure credentials from environment.
   async fillPassword(password: string): Promise<void> {
     await this.closeAIPopup();
     logStep('Entering password');
     await this.page.fill(this.passwordInput, password);
   }
 
+  // Clicks the login button.
   async clickLogin(): Promise<void> {
     await this.closeAIPopup();
     logStep('Clicking Log in');
@@ -45,6 +47,7 @@ export class LoginPage extends BasePage {
     await btn.click();
   }
 
+  // Detects and skips MFA prompt if shown, else safely continues.
   async handleMfaIfPresent(): Promise<void> {
     await this.closeAIPopup();
     try {
@@ -62,6 +65,7 @@ export class LoginPage extends BasePage {
   }
 
   /* Assertions */
+  // Asserts that the displayed login error matches the expected message
   async assertError(expected: string): Promise<void> {
     await this.closeAIPopup();
     logStep(`Verifying error message contains "${expected}"`);
@@ -73,6 +77,7 @@ export class LoginPage extends BasePage {
     logInfo('Error message verified');
   }
 
+  // Validates that the user landed on the "Connections" page post-login.
   async assertOnConnections(): Promise<void> {
     await this.handleMfaIfPresent();
     await this.closeAIPopup();
@@ -82,6 +87,8 @@ export class LoginPage extends BasePage {
     if (!text?.includes('connections')) throw new Error('Not on Connections page');
     logInfo('On Connections page');
   }
+
+  // Checks whether the login button is disabled (used in negative login tests).
   async isLoginButtonDisabled(): Promise<boolean> {
     const button = this.page.locator(this.loginButton);
     return !(await button.isEnabled());

@@ -1,4 +1,3 @@
-// src/utils/logger.ts
 export function logStep(msg: string) {
   console.log(`[STEP] ${msg}`);
 }

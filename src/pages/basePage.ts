@@ -3,19 +3,8 @@ import { logStep, logError } from '../utils/logger';
 
 export class BasePage {
   constructor(protected page: Page) {}
-
-  /**
-   * Attempts to close the RudderStack assistant (AI) popup if it is currently visible.
-   *
-   * The original implementation used a hard 1‑second wait via `waitForSelector()`
-   * on each invocation, which resulted in repeated timeout errors and noisy logs
-   * when the popup was not present (especially in headless CI runs). To make
-   * this helper less intrusive, we now poll for visibility using `locator.isVisible()`
-   * with a short timeout. Only when the popup is actually visible do we try to
-   * click it and wait for the floater to disappear. If the popup is absent,
-   * the call simply returns without logging an error. This prevents the log
-   * from being flooded with “AI popup not found or already closed” messages.
-   */
+// Checks for the presence of an AI assistant popup and closes it if visible.
+// Prevents it from interfering with other UI interactions.
   async closeAIPopup(): Promise<void> {
     const closeXPath = "//button[@aria-label='Close' and @data-action='close']";
     try {

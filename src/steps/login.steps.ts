@@ -1,7 +1,4 @@
-// src/steps/login.steps.ts
 import { Given, When, Then, setDefaultTimeout } from '@cucumber/cucumber';
-// Browser management is now handled via Cucumber hooks (see hooks.ts).
-// We no longer import or launch Playwright directly in these step definitions.
 import { LoginPage } from '../pages/loginPage';
 import { logStep } from '../utils/logger';
 import dotenv from 'dotenv';
@@ -9,9 +6,9 @@ import dotenv from 'dotenv';
 dotenv.config();
 setDefaultTimeout(90_000);
 
-// We no longer maintain our own Browser/Page instances here. Instead,
-// a LoginPage instance will be stored on the Cucumber World (this.loginPage).
-
+// Helper function to support placeholders like "env:MY_VAR" in feature files.
+// If the value starts with "env:", it reads the actual value from the process.env map.
+// Useful for passing secure credentials and config into Cucumber tests.
 const getEnv = (val: string) =>
   val.startsWith('env:') ? process.env[val.replace('env:', '').toUpperCase()]! : val;
 
@@ -39,7 +36,6 @@ When('the user submits the login form', async function () {
 Then('the error message {string} should be displayed', async function (msg: string) {
   logStep(`Assert error "${msg}"`);
   await this.loginPage!.assertError(msg);
-  // Browser/page cleanup is now handled by the After hook.
 });
 
 Then('the user should land on the Connections page', async function () {
